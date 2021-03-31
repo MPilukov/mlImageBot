@@ -4,6 +4,7 @@ using BaseBotLib.Services.Bot;
 using BaseBotLib.Services.Logger;
 using BaseBotLib.Services.Storage;
 using Microsoft.Extensions.Configuration;
+using MLImageBot.Logic;
 using MLImageLib;
 using System;
 using System.IO;
@@ -23,18 +24,19 @@ namespace MLImageBot
 
                 var botId = configs["AppSettings:bot.id"];
                 var botToken = configs["AppSettings:bot.token"];
-                var storage = GetStorage(configs, logger);
+                var storage = GetStorage(configs, logger);                
 
                 var bot = new Bot(botId, botToken, storage, logger);
 
                 var inceptionPath = configs["AppSettings:ml.inceptionPath"];
                 var setsPath = configs["AppSettings:ml.setsPath"];
                 var modelPath = configs["AppSettings:ml.modelPath"];
+                var tempImageDir = configs["AppSettings:ml.tempImageDir"];
 
                 var model = new Model(inceptionPath, setsPath, modelPath);
                 model.FitModel();
 
-                var ownerBot = new OwnerBot(bot, logger, model);
+                var ownerBot = new OwnerBot(bot, logger, model, setsPath, tempImageDir);
 
                 while (true)
                 {
