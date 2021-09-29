@@ -4,8 +4,8 @@ namespace MLImageBot.Logic
 {
     public class UserData
     {
-        public Dictionary<EAction, string> PreData;
-        public Stack<EAction> Actions;
+        public readonly Dictionary<EAction, string> PreData;
+        public readonly Stack<EAction> Actions;
 
         public UserData()
         {

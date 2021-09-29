@@ -11,13 +11,13 @@ namespace MLImageBot.Logic
 {
     public class OwnerBot
     {
-        private Dictionary<int, UserData> _usersData;
+        private readonly Dictionary<int, UserData> _usersData;
         private readonly IBot _bot;
         private readonly ILogger _logger;
         private readonly Model _model;
 
-        private string _setsPath;
-        private string _tempImageDir;
+        private readonly string _setsPath;
+        private readonly string _tempImageDir;
 
         public OwnerBot(
             IBot bot, ILogger logger, Model model, string setsPath, string tempImageDir)
@@ -61,7 +61,7 @@ namespace MLImageBot.Logic
 
             if (!string.IsNullOrWhiteSpace(message.FileId))
             {
-                await ProccesFile(message.ChatId, message.FileId, userData);
+                await ProcessFile(message.ChatId, message.FileId, userData);
                 return;
             }
 
@@ -80,7 +80,7 @@ namespace MLImageBot.Logic
             return newUserData;
         }
 
-        private async Task ProccesFile(int chatId, string fileId, UserData userData)
+        private async Task ProcessFile(int chatId, string fileId, UserData userData)
         {
             var fileBody = await _bot.GetFile(fileId);
             if (fileBody == null)
@@ -98,11 +98,11 @@ namespace MLImageBot.Logic
                 fs.Write(fileBody, 0, fileBody.Length);
             }
 
-            var classification = _model.ClassifySingleImage(filePath);
-            var percent = classification.score.Max() * 100;
+            var (score, label) = _model.ClassifySingleImage(filePath);
+            var percent = score.Max() * 100;
 
             var result =
-                $"Данное изображение содержит : {classification.label}" +
+                $"Данное изображение содержит : {label}" +
                 $" (вероятность = {percent.ToString("0.##")} %)";
             await SendMessage(chatId, result);
 
@@ -158,7 +158,7 @@ namespace MLImageBot.Logic
             await SendMessage(chatId, "Описание изображения изменено");
         }
 
-        private void CopyFile(string fileSource, string labelDir)
+        private static void CopyFile(string fileSource, string labelDir)
         {
             if (!Directory.Exists(labelDir))
             {
